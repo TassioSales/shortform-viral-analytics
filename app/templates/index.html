@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Viral Analytics | Inteligência Preditiva para Vídeos Curtos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9' },
+            danger: { 500: '#f43f5e', 600: '#e11d48' },
+            dark: { 900: '#0b0f19', 800: '#111827', 700: '#1f2937' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #0b0f19; color: #f3f4f6; font-family: ui-sans-serif, system-ui, sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #111827; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="border-b border-gray-800 bg-[#0e1424]/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 via-pink-500 to-rose-400 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-purple-500/20">
+        📱
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          Viral Analytics <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/30">TikTok • Reels • Shorts</span>
+        </h1>
+        <p class="text-xs text-gray-400">Engenharia Preditiva de Retenção, Pacing WPM e Ganchos Algorítmicos</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 text-xs">
+      <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800/80 border border-gray-700 text-gray-300">
+        <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+        Random Forest & DuckDB Ativos
+      </span>
+      <a href="https://github.com/TassioSales/shortform-viral-analytics" target="_blank" class="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-medium flex items-center gap-1.5 transition">
+        <i class="fab fa-github"></i> Repositório
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- KPI Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-4">
+        <p class="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">Vídeos Mapeados</p>
+        <h3 id="kpi-vids" class="text-2xl font-bold text-white mt-1">Carregando...</h3>
+        <p class="text-[10px] text-gray-500 mt-1">10.000 amostras analíticas</p>
+      </div>
+      <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-4">
+        <p class="text-[11px] uppercase tracking-wider text-purple-400 font-semibold">Visualizações Totais</p>
+        <h3 id="kpi-views" class="text-2xl font-bold text-purple-400 mt-1">Carregando...</h3>
+        <p class="text-[10px] text-gray-500 mt-1">Volume de audiência real</p>
+      </div>
+      <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-4">
+        <p class="text-[11px] uppercase tracking-wider text-emerald-400 font-semibold">Taxa de Conclusão Média</p>
+        <h3 id="kpi-completion" class="text-2xl font-bold text-emerald-400 mt-1">Carregando...</h3>
+        <p class="text-[10px] text-gray-500 mt-1">Watch-through rate</p>
+      </div>
+      <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-4">
+        <p class="text-[11px] uppercase tracking-wider text-amber-400 font-semibold">Cadência Média (WPM)</p>
+        <h3 id="kpi-wpm" class="text-2xl font-bold text-amber-400 mt-1">Carregando...</h3>
+        <p class="text-[10px] text-gray-500 mt-1">Palavras por minuto</p>
+      </div>
+      <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-4">
+        <p class="text-[11px] uppercase tracking-wider text-pink-400 font-semibold">Taxa de Viralidade</p>
+        <h3 id="kpi-viral" class="text-2xl font-bold text-pink-400 mt-1">Carregando...</h3>
+        <p class="text-[10px] text-gray-500 mt-1">> 250k views orgânicas</p>
+      </div>
+    </div>
+
+    <!-- Live Video Virality Simulator -->
+    <div class="bg-gradient-to-r from-gray-900 via-gray-800/70 to-gray-900 border border-purple-500/30 rounded-2xl p-6 shadow-xl">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+            <i class="fas fa-wand-magic-sparkles"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Simulador Preditivo de Viralidade & Retenção Algorítmica</h3>
+            <p class="text-xs text-gray-400">Ajuste os parâmetros de edição e roteiro para prever a resposta do algoritmo antes de postar.</p>
+          </div>
+        </div>
+        <span class="text-xs px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 font-mono">
+          ROC-AUC {{ metrics.roc_auc }} | R² {{ metrics.r2_score }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Controls Column 1 -->
+        <div class="space-y-4 text-xs">
+          <div>
+            <label class="block text-gray-400 font-medium mb-1">Plataforma Alvo</label>
+            <select id="sim-platform" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-white">
+              <option value="TikTok">TikTok</option>
+              <option value="YouTube Shorts">YouTube Shorts</option>
+              <option value="Instagram Reels">Instagram Reels</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-400 font-medium mb-1">Nicho / Tema</label>
+            <select id="sim-niche" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-white">
+              <option value="Tech & Inteligência Artificial">Tech & Inteligência Artificial</option>
+              <option value="Curiosidades & Fatos Ocultos">Curiosidades & Fatos Ocultos</option>
+              <option value="Finanças & Investimentos">Finanças & Investimentos</option>
+              <option value="True Crime & Mistério">True Crime & Mistério</option>
+              <option value="Pets & Vlogs Humanizados">Pets & Vlogs Humanizados</option>
+              <option value="Humor & Reacts Rápidos">Humor & Reacts Rápidos</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-400 font-medium mb-1">Tipo de Gancho (Primeiros 3s)</label>
+            <select id="sim-hook" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-xl text-white">
+              <option value="Negative Warning ('Pare de cometer esse erro agora...')">Negative Warning ('Pare de cometer esse erro...')</option>
+              <option value="Curiosity Gap ('O segredo que ninguém te conta...')">Curiosity Gap ('O segredo que ninguém te conta...')</option>
+              <option value="Visual Disruption (Corte dinâmico / Objeto inesperado)">Visual Disruption (Corte dinâmico/Inesperado)</option>
+              <option value="Question Hook ('Você sabia que 90% das pessoas...?')">Question Hook ('Você sabia que...?')</option>
+              <option value="Direct Statement ('Hoje vou te mostrar como...')">Direct Statement ('Hoje vou te mostrar...')</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Controls Column 2 -->
+        <div class="space-y-4 text-xs">
+          <div>
+            <div class="flex justify-between text-gray-400 font-medium mb-1">
+              <span>Duração Total</span>
+              <span id="label-duration" class="text-purple-400 font-bold">30s</span>
+            </div>
+            <input type="range" id="sim-duration" min="15" max="90" step="5" value="30" class="w-full accent-purple-500" oninput="updateRangeLabels()">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-gray-400 font-medium mb-1">
+              <span>Velocidade de Fala (WPM)</span>
+              <span id="label-wpm" class="text-purple-400 font-bold">180 WPM</span>
+            </div>
+            <input type="range" id="sim-wpm" min="110" max="230" step="5" value="180" class="w-full accent-purple-500" oninput="updateRangeLabels()">
+          </div>
+
+          <div>
+            <div class="flex justify-between text-gray-400 font-medium mb-1">
+              <span>Cortes por Minuto (Pacing)</span>
+              <span id="label-cuts" class="text-purple-400 font-bold">25 cortes/min</span>
+            </div>
+            <input type="range" id="sim-cuts" min="10" max="40" step="1" value="25" class="w-full accent-purple-500" oninput="updateRangeLabels()">
+          </div>
+
+          <div class="flex items-center gap-4 pt-1">
+            <label class="flex items-center gap-2 cursor-pointer text-gray-300">
+              <input type="checkbox" id="sim-audio" checked class="accent-purple-500 rounded">
+              <span>Áudio Trending</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer text-gray-300">
+              <input type="checkbox" id="sim-subtitles" checked class="accent-purple-500 rounded">
+              <span>Legendas Dinâmicas</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Predict Output Column -->
+        <div class="bg-gray-950/70 border border-gray-800 rounded-xl p-4 flex flex-col justify-between">
+          <div>
+            <p class="text-[11px] text-gray-400 uppercase font-bold tracking-wider">Score Preditivo do Algoritmo</p>
+            <div class="mt-2 flex items-baseline gap-2">
+              <h2 id="pred-prob" class="text-3xl font-extrabold text-purple-400">--%</h2>
+              <span id="pred-class" class="text-xs px-2 py-0.5 rounded font-bold uppercase bg-purple-500/20 text-purple-300"></span>
+            </div>
+            <div class="mt-3 space-y-2">
+              <div>
+                <div class="flex justify-between text-[11px] text-gray-400">
+                  <span>Taxa de Conclusão Esperada:</span>
+                  <span id="pred-completion" class="font-bold text-white">--%</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-800 rounded-full mt-1 overflow-hidden">
+                  <div id="bar-completion" class="h-full bg-emerald-400 transition-all duration-300" style="width: 0%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="flex justify-between text-[11px] text-gray-400">
+                  <span>Retenção 3 Primeiros Segundos:</span>
+                  <span id="pred-ret3s" class="font-bold text-white">--%</span>
+                </div>
+                <div class="w-full h-1.5 bg-gray-800 rounded-full mt-1 overflow-hidden">
+                  <div id="bar-ret3s" class="h-full bg-purple-400 transition-all duration-300" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="pred-tips" class="mt-3 text-[11px] space-y-1 text-gray-400 border-t border-gray-800/80 pt-2">
+          </div>
+
+          <button onclick="runSimulation()" class="mt-3 w-full py-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl text-xs shadow-lg shadow-purple-600/30 transition flex items-center justify-center gap-1.5">
+            <i class="fas fa-play"></i> Recalcular Previsão
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-5">
+        <h3 class="text-sm font-bold text-gray-200 mb-4 flex items-center justify-between">
+          <span>Performance por Tipo de Gancho Inicial</span>
+          <span class="text-xs text-gray-500 font-normal">Retenção de 3s vs Conclusão</span>
+        </h3>
+        <div class="h-64">
+          <canvas id="hookChart"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-5">
+        <h3 class="text-sm font-bold text-gray-200 mb-4 flex items-center justify-between">
+          <span>Distribuição de WPM vs Retenção de Audiência</span>
+          <span class="text-xs text-gray-500 font-normal">Sweet Spot de Cadência</span>
+        </h3>
+        <div class="h-64">
+          <canvas id="wpmChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform Benchmark Cards -->
+    <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-5">
+      <h3 class="text-sm font-bold text-gray-200 mb-4">Benchmark Comparativo entre Plataformas</h3>
+      <div id="platform-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="border-t border-gray-800 bg-[#0c1220] py-4 text-center text-xs text-gray-500">
+    Viral Analytics &copy; 2026 • Desenvolvido por <span class="text-gray-300 font-semibold">TassioSales</span> • Stack: Python, DuckDB, Scikit-Learn, FastAPI, Tailwind CSS.
+  </footer>
+
+  <script>
+    function updateRangeLabels() {
+      document.getElementById('label-duration').textContent = document.getElementById('sim-duration').value + 's';
+      document.getElementById('label-wpm').textContent = document.getElementById('sim-wpm').value + ' WPM';
+      document.getElementById('label-cuts').textContent = document.getElementById('sim-cuts').value + ' cortes/min';
+    }
+
+    async function loadDashboard() {
+      // Summary
+      const summaryRes = await fetch('/api/summary');
+      const s = await summaryRes.json();
+      document.getElementById('kpi-vids').textContent = s.total_videos.toLocaleString('pt-BR');
+      document.getElementById('kpi-views').textContent = (s.total_views / 1e9).toFixed(2) + ' Bi';
+      document.getElementById('kpi-completion').textContent = s.avg_completion + '%';
+      document.getElementById('kpi-wpm').textContent = s.avg_wpm + ' WPM';
+      document.getElementById('kpi-viral').textContent = s.viral_rate + '%';
+
+      // Hook Chart
+      const hookRes = await fetch('/api/hook_performance');
+      const hooks = await hookRes.json();
+      new Chart(document.getElementById('hookChart'), {
+        type: 'bar',
+        data: {
+          labels: hooks.map(h => h.hook_type),
+          datasets: [{
+            label: 'Retenção 3s (%)',
+            data: hooks.map(h => h.avg_ret_3s),
+            backgroundColor: '#8b5cf6',
+            borderRadius: 6
+          }, {
+            label: 'Taxa Viral (%)',
+            data: hooks.map(h => h.viral_pct),
+            backgroundColor: '#f43f5e',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#9ca3af', font: { size: 10 } } } },
+          scales: {
+            x: { ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { display: false } },
+            y: { ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { color: '#1f2937' } }
+          }
+        }
+      });
+
+      // WPM Chart
+      const wpmRes = await fetch('/api/wpm_distribution');
+      const wpms = await wpmRes.json();
+      new Chart(document.getElementById('wpmChart'), {
+        type: 'line',
+        data: {
+          labels: wpms.map(w => w.bucket),
+          datasets: [{
+            label: 'Taxa de Conclusão (%)',
+            data: wpms.map(w => w.avg_completion),
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.3
+          }, {
+            label: 'Taxa Viral (%)',
+            data: wpms.map(w => w.viral_rate),
+            borderColor: '#ec4899',
+            borderDash: [5, 5],
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#9ca3af', font: { size: 10 } } } },
+          scales: {
+            x: { ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { display: false } },
+            y: { ticks: { color: '#9ca3af', font: { size: 9 } }, grid: { color: '#1f2937' } }
+          }
+        }
+      });
+
+      // Platform Grid
+      const platRes = await fetch('/api/platform_metrics');
+      const plats = await platRes.json();
+      document.getElementById('platform-grid').innerHTML = plats.map(p => `
+        <div class="bg-gray-900/60 border border-gray-800 rounded-xl p-4">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-white">${p.platform}</h4>
+            <span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">${(p.views/1e6).toFixed(0)}M views</span>
+          </div>
+          <div class="mt-3 space-y-1 text-xs text-gray-400">
+            <div class="flex justify-between"><span>Retenção 3s:</span> <span class="font-bold text-white">${p.ret_3s}%</span></div>
+            <div class="flex justify-between"><span>Conclusão Média:</span> <span class="font-bold text-white">${p.completion}%</span></div>
+            <div class="flex justify-between"><span>Taxa de Vídeos Virais:</span> <span class="font-bold text-pink-400">${p.viral_pct}%</span></div>
+          </div>
+        </div>
+      `).join('');
+
+      // Run initial simulation
+      await runSimulation();
+    }
+
+    async function runSimulation() {
+      const payload = {
+        platform: document.getElementById('sim-platform').value,
+        niche: document.getElementById('sim-niche').value,
+        hook_type: document.getElementById('sim-hook').value,
+        duration_sec: parseInt(document.getElementById('sim-duration').value),
+        wpm: parseInt(document.getElementById('sim-wpm').value),
+        cuts_per_minute: parseFloat(document.getElementById('sim-cuts').value),
+        hook_duration_sec: 2.5,
+        has_trending_audio: document.getElementById('sim-audio').checked,
+        has_dynamic_subtitles: document.getElementById('sim-subtitles').checked
+      };
+
+      const res = await fetch('/api/predict_video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      document.getElementById('pred-prob').textContent = data.viral_probability_pct + '%';
+      document.getElementById('pred-class').textContent = data.classification;
+      document.getElementById('pred-completion').textContent = data.completion_rate_pct + '%';
+      document.getElementById('bar-completion').style.width = Math.min(100, data.completion_rate_pct) + '%';
+      document.getElementById('pred-ret3s').textContent = data.estimated_retention_3s + '%';
+      document.getElementById('bar-ret3s').style.width = Math.min(100, data.estimated_retention_3s) + '%';
+
+      document.getElementById('pred-tips').innerHTML = data.actionable_tips.map(t => `<p>${t}</p>`).join('');
+    }
+
+    window.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
+</body>
+</html>
